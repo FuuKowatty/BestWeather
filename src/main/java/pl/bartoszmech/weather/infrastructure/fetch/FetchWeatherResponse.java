@@ -2,6 +2,7 @@ package pl.bartoszmech.weather.infrastructure.fetch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.Getter;
 import lombok.ToString;
 
 import java.util.List;
@@ -13,8 +14,8 @@ public class FetchWeatherResponse {
     @JsonProperty("data")
     List<WeatherData> data;
 
-    @ToString
-    private static class WeatherData {
+    @Getter
+    public static class WeatherData {
         @JsonProperty("temp")
         double temperature;
         @JsonProperty("wind_spd")

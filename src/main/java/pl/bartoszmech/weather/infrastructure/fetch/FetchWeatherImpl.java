@@ -39,7 +39,6 @@ public class FetchWeatherImpl implements FetchWeather {
                 }
                 fetchedWeathers.add(fetchedWeather);
             }
-            log.info(fetchedWeathers);
             return fetchedWeathers;
         } catch (ResourceAccessException e) {
             log.error("Error while fetching offers");
