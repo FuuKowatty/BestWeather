@@ -46,6 +46,7 @@ public class FetchWeatherImpl implements FetchWeather {
         }
     }
 
+
     private FetchWeatherResponse makeWeatherRequest(HttpEntity<HttpHeaders> requestEntity, String url) {
         ResponseEntity<FetchWeatherResponse> response = restTemplate.exchange(
                 url,
