@@ -12,6 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import pl.bartoszmech.weather.domain.weather.FetchWeather;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
@@ -25,23 +27,27 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 public class FetchWeatherImpl implements FetchWeather {
     RestTemplate restTemplate;
     @Override
-    public List<FetchWeatherResponse> fetchFromLocalizations(String[] urls) {
+    public List<FetchWeatherResponse> fetchWeather(String[] urls) {
         final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(createHeader());
+        List<FetchWeatherResponse> fetchedWeathers = new LinkedList<>();
         try {
-            FetchWeatherResponse fetchedWeather = fetchWeather(requestEntity, urls[0]);
-            if(fetchedWeather == null) {
-                log.error("Response body was null.");
-                throw new ResponseStatusException(NO_CONTENT);
+            for (String url : urls) {
+                 FetchWeatherResponse fetchedWeather = makeWeatherRequest(requestEntity, url);
+                if(fetchedWeather == null) {
+                    log.error("Response body was null.");
+                    throw new ResponseStatusException(NO_CONTENT);
+                }
+                fetchedWeathers.add(fetchedWeather);
             }
-            log.info(fetchedWeather);
-            return List.of(fetchedWeather);
+            log.info(fetchedWeathers);
+            return fetchedWeathers;
         } catch (ResourceAccessException e) {
             log.error("Error while fetching offers");
             throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
         }
     }
 
-    private FetchWeatherResponse fetchWeather(HttpEntity<HttpHeaders> requestEntity, String url) {
+    private FetchWeatherResponse makeWeatherRequest(HttpEntity<HttpHeaders> requestEntity, String url) {
         ResponseEntity<FetchWeatherResponse> response = restTemplate.exchange(
                 url,
                 GET,

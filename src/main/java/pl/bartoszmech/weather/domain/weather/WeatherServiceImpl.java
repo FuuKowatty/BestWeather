@@ -17,6 +17,6 @@ public class WeatherServiceImpl implements WeatherService {
         };
 
 
-        fetcher.fetchFromLocalizations(urls);
+        fetcher.fetchWeather(urls);
     }
 }
