@@ -20,5 +20,7 @@ public class FetchWeatherResponse {
         double temperature;
         @JsonProperty("wind_spd")
         private double windSpd;
+        @JsonProperty("datetime")
+        private String datetime;
     }
 }

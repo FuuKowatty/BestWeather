@@ -18,6 +18,6 @@ public class WeatherController {
     @GetMapping( "/api/best-weather")
     public WeatherResponse getWeather(@RequestParam("date") String date) {
         RequestValidator.validateDateFormat(date);
-        return weatherService.getBestLocation();
+        return weatherService.getBestLocation(date);
     }
 }
