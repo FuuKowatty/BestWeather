@@ -14,9 +14,6 @@ public class WeatherController {
 
     @GetMapping( "/api/best-weather")
     public WeatherResponse getWeather() {
-
-        weatherService.getBestLocation();
-
-        return null;
+        return weatherService.getBestLocation();
     }
 }
