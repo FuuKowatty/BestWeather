@@ -2,9 +2,14 @@ package pl.bartoszmech.weather.domain.weather;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 import pl.bartoszmech.weather.application.response.WeatherResponse;
 import pl.bartoszmech.weather.infrastructure.fetch.FetchWeatherResponse;
+import pl.bartoszmech.weather.infrastructure.fetch.WeatherConfigurationProperties;
 
+import java.net.URI;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,14 +19,9 @@ public class WeatherServiceImpl implements WeatherService {
     public static final String DATE_DONT_MATCH = "Provided date does not match any of the downloaded dates";
     FetchWeather fetcher;
     BestLocationService bestLocationService;
+    private final WeatherConfigurationProperties properties;
     public WeatherResponse getBestLocation(String date) {
-        String[] urls = {
-            "https://api.weatherbit.io/v2.0/forecast/daily?city=Jastarnia&key=62b8eaf750a048359a1df467b11c688a",
-            "https://api.weatherbit.io/v2.0/forecast/daily?city=Bridgetown&key=62b8eaf750a048359a1df467b11c688a",
-            "https://api.weatherbit.io/v2.0/forecast/daily?city=Fortaleza&key=62b8eaf750a048359a1df467b11c688a",
-            "https://api.weatherbit.io/v2.0/forecast/daily?city=Pisouri&key=62b8eaf750a048359a1df467b11c688a",
-            "https://api.weatherbit.io/v2.0/forecast/daily?city=Le%20Morne&key=62b8eaf750a048359a1df467b11c688a"
-        };
+        List<URI> urls = generateUrls();
         List<FetchWeatherResponse> fetchWeather = fetcher.fetchWeather(urls);
         if (checkIfAnyFetchedDateMatchesClientDate(date, fetchWeather)) {
             throw new InvalidDateException(DATE_DONT_MATCH);
@@ -29,6 +29,22 @@ public class WeatherServiceImpl implements WeatherService {
         return bestLocationService.findBestLocation(filterLocationsByClientDate(date, fetchWeather));
     }
 
+    private List<URI> generateUrls() {
+        List<URI> urls = new LinkedList<>();
+        String baseUrl = properties.baseUrl();
+        String apiKey = properties.apiKey();
+
+        for (String city : properties.cityNames().split(",")) {
+            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
+            UriComponents components = builder.queryParam("city", city.trim())
+                    .queryParam("key", apiKey)
+                    .build();
+
+            URI url = components.toUri();
+            urls.add(url);
+        }
+        return urls;
+    }
     private List<FetchWeatherResponse> filterLocationsByClientDate(String date, List<FetchWeatherResponse> fetchWeather) {
         return fetchWeather.stream()
             .map(location -> new FetchWeatherResponse(

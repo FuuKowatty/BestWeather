@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import pl.bartoszmech.weather.domain.weather.FetchWeather;
 
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,12 +27,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 public class FetchWeatherImpl implements FetchWeather {
     RestTemplate restTemplate;
     @Override
-    public List<FetchWeatherResponse> fetchWeather(String[] urls) {
+    public List<FetchWeatherResponse> fetchWeather(List<URI> urls) {
         final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(createHeader());
         List<FetchWeatherResponse> fetchedWeathers = new LinkedList<>();
         try {
-            for (String url : urls) {
-                 FetchWeatherResponse fetchedWeather = makeWeatherRequest(requestEntity, url);
+            for (URI uri : urls) {
+                FetchWeatherResponse fetchedWeather = makeWeatherRequest(requestEntity, uri.toString());
                 if(fetchedWeather == null) {
                     log.error("Response body was null.");
                     throw new ResponseStatusException(NO_CONTENT);
@@ -45,7 +45,6 @@ public class FetchWeatherImpl implements FetchWeather {
             throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
         }
     }
-
 
     private FetchWeatherResponse makeWeatherRequest(HttpEntity<HttpHeaders> requestEntity, String url) {
         ResponseEntity<FetchWeatherResponse> response = restTemplate.exchange(
