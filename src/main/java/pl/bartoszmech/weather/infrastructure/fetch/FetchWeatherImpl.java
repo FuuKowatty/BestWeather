@@ -27,12 +27,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 public class FetchWeatherImpl implements FetchWeather {
     RestTemplate restTemplate;
     @Override
-    public List<FetchWeatherResponse> fetchWeather(List<URI> urls) {
+    public List<FetchWeatherResponse> fetchWeather(List<String> urls) {
         final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(createHeader());
         List<FetchWeatherResponse> fetchedWeathers = new LinkedList<>();
         try {
-            for (URI uri : urls) {
-                FetchWeatherResponse fetchedWeather = makeWeatherRequest(requestEntity, uri.toString());
+            for (String uri : urls) {
+                FetchWeatherResponse fetchedWeather = makeWeatherRequest(requestEntity, uri);
                 if(fetchedWeather == null) {
                     log.error("Response body was null.");
                     throw new ResponseStatusException(NO_CONTENT);
@@ -41,7 +41,7 @@ public class FetchWeatherImpl implements FetchWeather {
             }
             return fetchedWeathers;
         } catch (ResourceAccessException e) {
-            log.error("Error while fetching offers");
+            log.error("Error while fetching locations: " + e.getMessage());
             throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
         }
     }
@@ -53,6 +53,7 @@ public class FetchWeatherImpl implements FetchWeather {
                 requestEntity,
                 new ParameterizedTypeReference<>() {
                 });
+        log.info("data downloaded successfully");
         return response.getBody();
     }
 

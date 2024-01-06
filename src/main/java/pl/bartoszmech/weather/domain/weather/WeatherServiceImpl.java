@@ -1,6 +1,7 @@
 package pl.bartoszmech.weather.domain.weather;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -9,19 +10,21 @@ import pl.bartoszmech.weather.infrastructure.fetch.FetchWeatherResponse;
 import pl.bartoszmech.weather.infrastructure.fetch.WeatherConfigurationProperties;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
 @Service
 @AllArgsConstructor
+@Log4j2
 public class WeatherServiceImpl implements WeatherService {
     public static final String DATE_DONT_MATCH = "Provided date does not match any of the downloaded dates";
     FetchWeather fetcher;
     BestLocationService bestLocationService;
     private final WeatherConfigurationProperties properties;
     public WeatherResponse getBestLocation(String date) {
-        List<URI> urls = generateUrls();
+        List<String> urls = generateUrls();
         List<FetchWeatherResponse> fetchWeather = fetcher.fetchWeather(urls);
         if (checkIfAnyFetchedDateMatchesClientDate(date, fetchWeather)) {
             throw new InvalidDateException(DATE_DONT_MATCH);
@@ -29,18 +32,18 @@ public class WeatherServiceImpl implements WeatherService {
         return bestLocationService.findBestLocation(filterLocationsByClientDate(date, fetchWeather));
     }
 
-    private List<URI> generateUrls() {
-        List<URI> urls = new LinkedList<>();
+    private List<String> generateUrls() {
+        List<String> urls = new LinkedList<>();
         String baseUrl = properties.baseUrl();
         String apiKey = properties.apiKey();
-
         for (String city : properties.cityNames().split(",")) {
             UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
             UriComponents components = builder.queryParam("city", city.trim())
                     .queryParam("key", apiKey)
                     .build();
 
-            URI url = components.toUri();
+            log.info("generated url " + components.toUri());
+            String url = components.toUriString();
             urls.add(url);
         }
         return urls;
