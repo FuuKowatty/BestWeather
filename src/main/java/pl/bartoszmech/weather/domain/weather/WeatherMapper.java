@@ -6,6 +6,7 @@ import pl.bartoszmech.weather.infrastructure.fetch.FetchWeatherResponse;
 
 @NoArgsConstructor
 public class WeatherMapper {
+
     public static WeatherResponse mapFetchedResponseToApiResponse(FetchWeatherResponse fetchedWeatherResponse) {
         return new WeatherResponse(
                 fetchedWeatherResponse.getCityName(),
@@ -13,4 +14,5 @@ public class WeatherMapper {
                 fetchedWeatherResponse.getData().get(0).getWindSpd()
         );
     }
+
 }

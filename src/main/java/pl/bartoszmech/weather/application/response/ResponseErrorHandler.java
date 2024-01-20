@@ -9,6 +9,7 @@ import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 @ControllerAdvice
 public class ResponseErrorHandler {
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(ResponseStatusException e) {
         return ResponseEntity.status(SERVICE_UNAVAILABLE).body(new ErrorResponse(e.getMessage()));

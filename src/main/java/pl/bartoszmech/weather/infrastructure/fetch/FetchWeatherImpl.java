@@ -20,7 +20,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @AllArgsConstructor
 @Log4j2
 public class FetchWeatherImpl implements FetchWeather {
-    WebClient webClient;
+
+    private final WebClient webClient;
+
     @Override
     public List<FetchWeatherResponse> fetchWeather(List<String> urls) {
         List<FetchWeatherResponse> fetchedWeathers = new LinkedList<>();

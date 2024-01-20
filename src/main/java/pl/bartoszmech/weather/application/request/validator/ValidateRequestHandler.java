@@ -11,6 +11,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @ControllerAdvice
 public class ValidateRequestHandler {
+
     @ExceptionHandler(InvalidDateFormatException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(InvalidDateFormatException e) {
         return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
@@ -25,4 +26,5 @@ public class ValidateRequestHandler {
     public ResponseEntity<ErrorResponse> handleValidationExceptions(InvalidDateException e) {
         return ResponseEntity.status(BAD_REQUEST).body(new ErrorResponse(e.getMessage()));
     }
+
 }

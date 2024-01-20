@@ -19,10 +19,12 @@ import java.util.Objects;
 @AllArgsConstructor
 @Log4j2
 public class WeatherServiceImpl implements WeatherService {
+
     public static final String DATE_DONT_MATCH = "Provided date does not match any of the downloaded dates";
-    FetchWeather fetcher;
-    BestLocationService bestLocationService;
+    private final FetchWeather fetcher;
+    private final BestLocationService bestLocationService;
     private final WeatherConfigurationProperties properties;
+
     public WeatherResponse getBestLocation(String date) {
         List<String> urls = generateUrls();
         List<FetchWeatherResponse> fetchWeather = fetcher.fetchWeather(urls);
@@ -48,6 +50,7 @@ public class WeatherServiceImpl implements WeatherService {
         }
         return urls;
     }
+
     private List<FetchWeatherResponse> filterLocationsByClientDate(String date, List<FetchWeatherResponse> fetchWeather) {
         return fetchWeather.stream()
             .map(location -> new FetchWeatherResponse(
@@ -63,10 +66,12 @@ public class WeatherServiceImpl implements WeatherService {
     private boolean checkIfAnyFetchedDateMatchesClientDate(String date, List<FetchWeatherResponse> fetchWeather) {
         return fetchWeather.stream().noneMatch(location -> isClientDateMatch(location, date));
     }
+
     private boolean isClientDateMatch(FetchWeatherResponse fetchedWeathers, String date) {
         List<FetchWeatherResponse.WeatherData> weatherData = fetchedWeathers.getData();
         return weatherData.stream()
                 .anyMatch(data -> data.getDatetime().equals(date));
     }
+
 }
 

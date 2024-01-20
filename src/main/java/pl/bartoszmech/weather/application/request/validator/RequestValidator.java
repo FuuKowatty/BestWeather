@@ -12,4 +12,5 @@ public class RequestValidator {
             throw new InvalidDateFormatException("Provided date format is invalid. Please make sure it is followed by \"YYYY-MM-DD\"");
         }
     }
+
 }

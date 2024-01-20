@@ -15,11 +15,12 @@ import static org.springframework.http.HttpStatus.OK;
 @AllArgsConstructor
 public class WeatherController {
 
-    WeatherService weatherService;
+    private final WeatherService weatherService;
 
     @GetMapping( "/api/best-weather")
     public ResponseEntity<WeatherResponse> getWeather(@RequestParam("date") String date) {
         RequestValidator.validateDateFormat(date);
         return ResponseEntity.status(OK).body(weatherService.getBestLocation(date));
     }
+
 }

@@ -19,7 +19,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Configuration
 public class WebClientConfig {
 
-
     @Bean
     public HttpClient getHttpClient(@Value("${api.offer.http.config.connectionTimeout:1000}") int connectionTimeout,
                                      @Value("${api.offer.http.config.readTimeout:1000}") int readTimeout) {
