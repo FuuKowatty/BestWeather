@@ -8,9 +8,7 @@ import pl.bartoszmech.weather.infrastructure.fetch.WeatherConfigurationPropertie
 @SpringBootApplication
 @EnableConfigurationProperties(WeatherConfigurationProperties.class)
 public class WeatherApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(WeatherApplication.class, args);
 	}
-
 }

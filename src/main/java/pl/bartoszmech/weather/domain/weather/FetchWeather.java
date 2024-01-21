@@ -6,5 +6,5 @@ import java.net.URI;
 import java.util.List;
 
 public interface FetchWeather {
-    List<FetchWeatherResponse> fetchWeather(List<String> urls);
+    List<FetchWeatherResponse> fetchWeather(List<String> urls, String date);
 }

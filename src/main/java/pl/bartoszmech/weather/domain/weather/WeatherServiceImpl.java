@@ -8,6 +8,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import pl.bartoszmech.weather.application.response.WeatherResponse;
 import pl.bartoszmech.weather.infrastructure.fetch.FetchWeatherResponse;
 import pl.bartoszmech.weather.infrastructure.fetch.WeatherConfigurationProperties;
+import pl.bartoszmech.weather.infrastructure.utils.UriParser;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -25,29 +26,9 @@ public class WeatherServiceImpl implements WeatherService {
     private final WeatherConfigurationProperties properties;
 
     public WeatherResponse getBestLocation(String date) {
-        List<String> urls = generateUrls();
-        List<FetchWeatherResponse> fetchWeather = fetcher.fetchWeather(urls);
-        if (checkIfAnyFetchedDateMatchesClientDate(date, fetchWeather)) {
-            throw new InvalidDateException();
-        }
+        List<String> urls = UriParser.generateUrls(properties);
+        List<FetchWeatherResponse> fetchWeather = fetcher.fetchWeather(urls, date);
         return bestLocationService.findBestLocation(filterLocationsByClientDate(date, fetchWeather));
-    }
-
-    private List<String> generateUrls() {
-        List<String> urls = new LinkedList<>();
-        String baseUrl = properties.baseUrl();
-        String apiKey = properties.apiKey();
-        for (String city : properties.cityNames().split(",")) {
-            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
-            UriComponents components = builder.queryParam("city", city.trim())
-                    .queryParam("key", apiKey)
-                    .build();
-
-            log.info("generated url " + components.toUri());
-            String url = components.toUriString();
-            urls.add(url);
-        }
-        return urls;
     }
 
     private List<FetchWeatherResponse> filterLocationsByClientDate(String date, List<FetchWeatherResponse> fetchWeather) {
@@ -60,16 +41,6 @@ public class WeatherServiceImpl implements WeatherService {
 
     private List<FetchWeatherResponse.WeatherData> filterByClientDate(List<FetchWeatherResponse.WeatherData> weatherData, String date) {
         return weatherData.stream().filter(data -> Objects.equals(data.getDatetime(), date)).toList();
-    }
-
-    private boolean checkIfAnyFetchedDateMatchesClientDate(String date, List<FetchWeatherResponse> fetchWeather) {
-        return fetchWeather.stream().noneMatch(location -> isClientDateMatch(location, date));
-    }
-
-    private boolean isClientDateMatch(FetchWeatherResponse fetchedWeathers, String date) {
-        List<FetchWeatherResponse.WeatherData> weatherData = fetchedWeathers.getData();
-        return weatherData.stream()
-                .anyMatch(data -> data.getDatetime().equals(date));
     }
 
 }

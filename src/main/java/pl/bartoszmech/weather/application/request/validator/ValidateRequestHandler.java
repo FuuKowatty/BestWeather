@@ -22,7 +22,7 @@ import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 @Log4j2
 public class ValidateRequestHandler {
 
-    MessageSource messageSource;
+    private final MessageSource messageSource;
 
     @ExceptionHandler(InvalidDateFormatException.class)
     public ResponseEntity<ErrorResponse> handleInvalidDateFormatException(InvalidDateFormatException e) {
