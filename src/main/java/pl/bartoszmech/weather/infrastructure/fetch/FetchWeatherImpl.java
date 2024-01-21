@@ -36,7 +36,7 @@ public class FetchWeatherImpl implements FetchWeather {
                 fetchedWeathers.add(fetchedWeather);
             });
             return fetchedWeathers;
-        } catch (ResourceAccessException e) {
+        } catch (Exception e) {
             log.error("Error while fetching locations: " + e.getMessage());
             throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
         }

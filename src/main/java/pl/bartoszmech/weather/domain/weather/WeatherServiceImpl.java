@@ -20,7 +20,6 @@ import java.util.Objects;
 @Log4j2
 public class WeatherServiceImpl implements WeatherService {
 
-    public static final String DATE_DONT_MATCH = "Provided date does not match any of the downloaded dates";
     private final FetchWeather fetcher;
     private final BestLocationService bestLocationService;
     private final WeatherConfigurationProperties properties;
@@ -29,7 +28,7 @@ public class WeatherServiceImpl implements WeatherService {
         List<String> urls = generateUrls();
         List<FetchWeatherResponse> fetchWeather = fetcher.fetchWeather(urls);
         if (checkIfAnyFetchedDateMatchesClientDate(date, fetchWeather)) {
-            throw new InvalidDateException(DATE_DONT_MATCH);
+            throw new InvalidDateException();
         }
         return bestLocationService.findBestLocation(filterLocationsByClientDate(date, fetchWeather));
     }

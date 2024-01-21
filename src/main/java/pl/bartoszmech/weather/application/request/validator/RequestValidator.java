@@ -9,7 +9,7 @@ public class RequestValidator {
 
     public static void validateDateFormat(String date) {
         if(!date.matches(YEAR_MONTH_DAY_PATTERN)) {
-            throw new InvalidDateFormatException("Provided date format is invalid. Please make sure it is followed by \"YYYY-MM-DD\"");
+            throw new InvalidDateFormatException();
         }
     }
 
