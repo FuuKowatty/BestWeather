@@ -56,4 +56,5 @@ public class BestLocationService {
     private boolean checkTemperature(double temperature) {
         return !(temperature < MINIMUM_TEMPERATURE_FOR_BEST_LOCATION) && !(temperature > MAXIMUM_TEMPERATURE_FOR_BEST_LOCATION);
     }
+
 }

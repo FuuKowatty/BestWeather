@@ -12,10 +12,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FetchWeatherResponse {
+
     @JsonProperty("city_name")
-    String cityName;
+    private String cityName;
     @JsonProperty("data")
-    List<WeatherData> data;
+    private List<WeatherData> data;
 
     @Data
     @AllArgsConstructor
@@ -28,4 +29,5 @@ public class FetchWeatherResponse {
         @JsonProperty("datetime")
         private String datetime;
     }
+
 }

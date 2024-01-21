@@ -2,21 +2,19 @@ package pl.bartoszmech.weather.infrastructure.fetch;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
+
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 import pl.bartoszmech.weather.domain.weather.FetchWeather;
+import pl.bartoszmech.weather.domain.weather.InvalidDateException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -24,42 +22,53 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Component
 @AllArgsConstructor
 @Log4j2
+@Profile("!dev")
 public class FetchWeatherImpl implements FetchWeather {
-    RestTemplate restTemplate;
+
+    private final WebClient webClient;
+
     @Override
-    public List<FetchWeatherResponse> fetchWeather(List<String> urls) {
-        final HttpEntity<HttpHeaders> requestEntity = new HttpEntity<>(createHeader());
-        List<FetchWeatherResponse> fetchedWeathers = new LinkedList<>();
+    public List<FetchWeatherResponse> fetchWeather(List<String> urls, String date) {
+        List<FetchWeatherResponse> fetchedWeathers;
         try {
-            for (String uri : urls) {
-                FetchWeatherResponse fetchedWeather = makeWeatherRequest(requestEntity, uri);
-                if(fetchedWeather == null) {
-                    log.error("Response body was null.");
-                    throw new ResponseStatusException(NO_CONTENT);
-                }
-                fetchedWeathers.add(fetchedWeather);
-            }
-            return fetchedWeathers;
-        } catch (ResourceAccessException e) {
+            fetchedWeathers = handleFetchWeather(urls);
+        } catch (Exception e) {
             log.error("Error while fetching locations: " + e.getMessage());
             throw new ResponseStatusException(INTERNAL_SERVER_ERROR);
         }
+
+        if (checkIfAnyFetchedDateMatchesClientDate(date, fetchedWeathers)) {
+            throw new InvalidDateException();
+        }
+
+        return fetchedWeathers;
     }
 
-    private FetchWeatherResponse makeWeatherRequest(HttpEntity<HttpHeaders> requestEntity, String url) {
-        ResponseEntity<FetchWeatherResponse> response = restTemplate.exchange(
-                url,
-                GET,
-                requestEntity,
-                new ParameterizedTypeReference<>() {
-                });
-        log.info("data downloaded successfully");
-        return response.getBody();
+    private List<FetchWeatherResponse> handleFetchWeather(List<String> urls) {
+        return Flux.fromIterable(urls)
+                .flatMap(this::makeWeatherRequest)
+                .collectList()
+                .block();
+        }
+
+    private Mono<FetchWeatherResponse> makeWeatherRequest(String url) {
+        return webClient.get()
+                .uri(url)
+                .accept(APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(FetchWeatherResponse.class)
+                .doOnSuccess(response -> log.info("data downloaded successfully"));
     }
 
-    private HttpHeaders createHeader() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(APPLICATION_JSON);
-        return headers;
+    private boolean checkIfAnyFetchedDateMatchesClientDate(String date, List<FetchWeatherResponse> fetchWeather) {
+        return fetchWeather.stream()
+                .noneMatch(location -> isClientDateMatch(location, date));
     }
+
+    private boolean isClientDateMatch(FetchWeatherResponse fetchedWeathers, String date) {
+        List<FetchWeatherResponse.WeatherData> weatherData = fetchedWeathers.getData();
+        return weatherData.stream()
+                .anyMatch(data -> data.getDatetime().equals(date));
+    }
+
 }
