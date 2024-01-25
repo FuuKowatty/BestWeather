@@ -14,6 +14,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import pl.bartoszmech.weather.application.request.validator.InvalidDateFormatException;
+import pl.bartoszmech.weather.application.request.validator.RequestValidator;
 import pl.bartoszmech.weather.application.response.ErrorResponse;
 
 import static com.github.tomakehurst.wiremock.common.ContentTypes.APPLICATION_JSON;
@@ -85,6 +87,24 @@ public class ApiValidationTest {
     }
 
     @Test
+    public void should_return_bad_request_when_provide_date_which_not_existing_in_api_in_polish() throws Exception{
+        //given
+        //when
+        MvcResult response = mockMvc.perform(get("/api/best-weather?lang=pl")
+                        .queryParam("date", "2023-01-05")
+                        .contentType(APPLICATION_JSON_VALUE))
+                //then
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        ErrorResponse  errorResponse = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorResponse.class);
+        Assertions.assertEquals(
+                "Przekazany parametr date nie pasuje do zadnego z pobranych",
+                errorResponse.message()
+        );
+    }
+
+    @Test
     public void should_return_bad_request_when_provide_invalid_date_format() throws Exception{
         //given
         //when
@@ -103,6 +123,24 @@ public class ApiValidationTest {
     }
 
     @Test
+    public void should_return_bad_request_when_provide_invalid_date_format_in_polish() throws Exception{
+        //given
+        //when
+        MvcResult response = mockMvc.perform(get("/api/best-weather?lang=pl")
+                        .queryParam("date", "01.05.2024")
+                        .contentType(APPLICATION_JSON_VALUE))
+                //then
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        ErrorResponse  errorResponse = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorResponse.class);
+        Assertions.assertEquals(
+                "Nieprawidlowy format daty, prosze upewnij sie ze jest on w ukladzie \"YYYY-MM-DD\"",
+                errorResponse.message()
+        );
+    }
+
+    @Test
     public void should_return_bad_request_when_not_provide_date() throws Exception {
         //given
         //when
@@ -114,9 +152,46 @@ public class ApiValidationTest {
 
         ErrorResponse  errorResponse = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorResponse.class);
         Assertions.assertEquals(
-                "Required request parameter 'date' for method parameter type String is not present",
+                "You did not provide \"date\" parameter",
                 errorResponse.message()
         );
+    }
+
+    @Test
+    public void should_return_bad_request_when_not_provide_date_in_polish() throws Exception {
+        //given
+        //when
+        MvcResult response = mockMvc.perform(get("/api/best-weather?lang=pl")
+                        .contentType(APPLICATION_JSON_VALUE))
+                //then
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        ErrorResponse  errorResponse = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorResponse.class);
+        Assertions.assertEquals(
+                "Nie przekazano parametru \"date\"",
+                errorResponse.message()
+        );
+    }
+
+    @Test
+    public void should_return_bad_request_when_passing_empty_string_as_date() {
+        //given
+        String invalidDateFormat = "";
+
+        //when
+        //then
+        Assertions.assertThrows(InvalidDateFormatException.class, () -> RequestValidator.validateDateFormat(invalidDateFormat));
+    }
+
+    @Test
+    public void should_return_bad_request_when_passing_bad_order_of_date() {
+        //given
+        String invalidDateFormat = "01-01-2024";
+
+        //when
+        //then
+        Assertions.assertThrows(InvalidDateFormatException.class, () -> RequestValidator.validateDateFormat(invalidDateFormat));
     }
 
 }

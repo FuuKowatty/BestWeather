@@ -109,7 +109,7 @@ public class WeatherControllerTest {
         ErrorResponse  errorResponse = objectMapper.readValue(response.getResponse().getContentAsString(), ErrorResponse.class);
         Assertions.assertEquals(
                 errorResponse.message(),
-                "500 INTERNAL_SERVER_ERROR \"Error while using http client\"");
+                "Unable to download data from external service");
     }
 
 }
