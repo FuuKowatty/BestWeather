@@ -16,7 +16,6 @@ public class DumbRestClient implements FetchWeather {
 
     private static final double MIN_TEMPERATURE = -10.0;
     private static final double MAX_TEMPERATURE = 35.0;
-
     private static final double MIN_WIND_SPEED = 1.0;
     private static final double MAX_WIND_SPEED = 30.0;
 
