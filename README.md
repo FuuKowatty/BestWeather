@@ -25,11 +25,11 @@ The list of windsurfing locations (including geographical coordinates) should be
 
 ## Endpoints
 
-| endpoint          | method | request                  | response                        | function                                        |
-|-------------------|--------|--------------------------|---------------------------------|-------------------------------------------------|
-| /api/best-weather | GET    | DATE FORMAT (YYYY-MM-DD) | Best location based on selected | get to know where is best place for windsurfing |
+| endpoint          | method | request                                                               | response                        | function                                        |
+|-------------------|--------|-----------------------------------------------------------------------|---------------------------------|-------------------------------------------------|
+| /api/best-weather | GET    | query params: (DATE FORMAT (YYYY-MM-DD), lang (available pl and end)) | Best location based on selected | get to know where is best place for windsurfing |
     
-
+example link: http://localhost:8080/api/best-weather?date=2024-01-26&lang=pl (make sure date is Please make sure that the date is within the next 14 days from now because thats external API requirements)
 ## How to build the project on your own
 1. Clone this repository
 ```shell
